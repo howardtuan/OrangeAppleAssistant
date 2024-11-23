@@ -16,9 +16,13 @@ def onOK():
         schedule_str = "專案完整完成囉！請繼續保持～"
     else:
         schedule_str = "專案尚未完成哦！有空的話可以利用閒暇時間補完～加油！"
-
+    
+    if CheckVar1.get() == 1:  # 上週未完成專案完成
+        msg = "這次在課程中已經將上次未完成的專案完成囉！\n"
+    else:# 上週進度正常
+        msg = ""
     if CheckVarAI.get() == 1:
-        msg = f"{entry.get()}今天的進度是{CodeName}的第{comboExample2.get()[1:]}課－{WhatInside}\n-------------------------------------------------\n{entry.get()}的{schedule_str}"
+        msg += f"{entry.get()}今天的進度是{CodeName}的第{comboExample2.get()[1:]}課－{WhatInside}\n-------------------------------------------------\n{entry.get()}的{schedule_str}"
         
         AI_MSG = aichat(msg, study_performance)
 
@@ -27,7 +31,7 @@ def onOK():
         window.update()
         tkinter.messagebox.showinfo(title="訊息已複製", message=f"已將內容複製到剪貼板：\n\n{AI_MSG}")
     else:
-        msg = f"{entry.get()}今天的進度是{CodeName}的第{comboExample2.get()[1:]}課－{WhatInside}\n-------------------------------------------------\n{entry.get()}的{schedule_str}"
+        msg += f"{entry.get()}今天的進度是{CodeName}的第{comboExample2.get()[1:]}課－{WhatInside}\n-------------------------------------------------\n{entry.get()}的{schedule_str}"
         window.clipboard_clear()
         window.clipboard_append(msg)
         window.update()
