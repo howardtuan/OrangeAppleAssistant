@@ -15,8 +15,7 @@
 ## 安裝步驟
 1. 複製專案到本地：
    ```bash
-   git clone https://github.com/your-repo/orangeapple.git
-   cd orangeapple
+   git clone https://github.com/your-repo/orangeapple.git 
    ```
 2. 建立虛擬環境（可選但建議使用）：
    ```bash
