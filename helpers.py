@@ -69,6 +69,7 @@ def get_course_details(combo_value, lesson_value):
         "Scratch0": ("Scratch實戰班", db.Scratch0),
         "Scratch1": ("Scratch菁英班", db.Scratch1),
         "Python": ("Python程式開發班", db.Python),
+        "Python2": ("Python程式進階班", db.Python2),
         "JavaScript": ("JavaScript程式開發班", db.JavaScript),
         "JavaScript_New": ("JavaScript進階班", db.JavaScript_New),
         "HTML": ("HTML5網頁程式開發班", db.HTML),
