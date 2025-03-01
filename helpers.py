@@ -32,9 +32,9 @@ def aichat(msg,study,config_path="config.json"):
     小明今天的進度是Scratch菁英班的第2課－「絕佳配對」，卡牌配對的小遊戲，除了認識全等與相似以外，也有用程式邏輯去判斷是否全等跟是否相似。這堂課也運用到很多清單的邏輯，程式碼也變非常多，所以寫程式的時候一定要非常細心哦～
     -------------------------------------------------
     小明的專案完整完成囉！請繼續保持～"""
-    # 使用OpenAI GPT-3.5 Turbo模型進行對話
+    # 使用OpenAI GPT-4o Mini 模型進行對話
     completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": start},
             {"role": "user", "content": "學習紀錄："+ori_msg+"上課表現："+"認真 準時完成"},
