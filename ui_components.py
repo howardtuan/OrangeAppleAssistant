@@ -1,45 +1,156 @@
-import tkinter as tk
+﻿import tkinter as tk
 from tkinter import ttk
 
-def create_ui(window, onOK_callback):
-    # 建立 UI 元件
-    label = ttk.Label(window, text='姓名')
-    label.grid(row=2, column=2)
 
-    entry = tk.Entry(window, width=20)
-    entry.grid(row=2, column=3)
+def create_ui(window, on_generate):
+    window.title("學生聯絡簿產生器")
+    window.geometry("1080x720")
+    window.minsize(1040, 680)
 
-    label_study = ttk.Label(window, text='學習表現（AI判斷用）')
-    label_study.grid(row=3, column=4)
+    root = ttk.Frame(window, padding=20)
+    root.grid(sticky="nsew")
+    window.columnconfigure(0, weight=1)
+    window.rowconfigure(0, weight=1)
 
-    entrystudy = tk.Entry(window, width=20)
-    entrystudy.grid(row=3, column=5)
+    header = ttk.Frame(root)
+    header.grid(row=0, column=0, sticky="ew")
+    header.columnconfigure(0, weight=1)
 
-    comboExample1 = ttk.Combobox(window, values=["Scratch0", "Scratch1", "Python","Python2","JavaScript","JavaScript_New","HTML","DB","Algorithm","AI"])
-    comboExample1.current(1)
-    comboExample1.grid(row=3, column=2)
+    title = ttk.Label(header, text="學生聯絡簿產生器", font=("Microsoft JhengHei", 20, "bold"))
+    subtitle = ttk.Label(
+        header,
+        text="快速整理課堂紀錄，包含驗收問題與學習表現",
+        font=("Microsoft JhengHei", 11),
+    )
+    title.grid(row=0, column=0, sticky="w")
+    subtitle.grid(row=1, column=0, sticky="w", pady=(4, 0))
 
-    comboExample2 = ttk.Combobox(window, values=[f"L{i}" for i in range(1, 16)])
-    comboExample2.current(1)
-    comboExample2.grid(row=3, column=3)
+    content = ttk.Frame(root)
+    content.grid(row=1, column=0, sticky="nsew", pady=(16, 0))
+    root.rowconfigure(1, weight=1)
+    content.columnconfigure(0, weight=1)
+    content.columnconfigure(1, weight=1)
+    content.rowconfigure(0, weight=1)
 
-    CheckVar1 = tk.IntVar()
-    C1 = tk.Checkbutton(window, text="上週未完成專案", variable=CheckVar1, onvalue=1, offvalue=0)
-    C1.grid(row=4, column=2)
+    left = ttk.LabelFrame(content, text="基本資料", padding=16)
+    left.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
+    right = ttk.LabelFrame(content, text="課堂紀錄", padding=16)
+    right.grid(row=0, column=1, sticky="nsew")
+    left.columnconfigure(1, weight=1)
+    right.columnconfigure(0, weight=1)
+    right.rowconfigure(3, weight=1)
 
-    CheckVarAI = tk.IntVar()
-    C2 = tk.Checkbutton(window, text="使用AI", variable=CheckVarAI, onvalue=1, offvalue=0)
-    C2.grid(row=5, column=2)
+    ttk.Label(left, text="學生姓名", font=("Microsoft JhengHei", 11)).grid(
+        row=0, column=0, sticky="w", pady=(0, 8)
+    )
+    name_entry = ttk.Entry(left, width=24)
+    name_entry.grid(row=0, column=1, sticky="ew", pady=(0, 8))
 
-    radiobutton_var = tk.StringVar()
-    myradiobutton1 = tk.Radiobutton(window, text='完成', value=1, variable=radiobutton_var)
-    myradiobutton1.select()
-    myradiobutton1.grid(row=4, column=3)
+    ttk.Label(left, text="課程", font=("Microsoft JhengHei", 11)).grid(
+        row=1, column=0, sticky="w", pady=(0, 8)
+    )
+    course_combo = ttk.Combobox(
+        left,
+        values=["Scratch0", "Scratch1", "Python", "Python2", "JavaScript", "JavaScript_New", "HTML", "DB", "Algorithm", "AI"],
+        state="readonly",
+    )
+    course_combo.current(1)
+    course_combo.grid(row=1, column=1, sticky="ew", pady=(0, 8))
 
-    myradiobutton2 = tk.Radiobutton(window, text='未完成', value=2, variable=radiobutton_var)
-    myradiobutton2.grid(row=5, column=3)
+    ttk.Label(left, text="課次", font=("Microsoft JhengHei", 11)).grid(
+        row=2, column=0, sticky="w", pady=(0, 8)
+    )
+    lesson_combo = ttk.Combobox(
+        left,
+        values=[f"L{i}" for i in range(1, 16)],
+        state="readonly",
+    )
+    lesson_combo.current(1)
+    lesson_combo.grid(row=2, column=1, sticky="ew", pady=(0, 8))
 
-    button = ttk.Button(window, text="OK", command=onOK_callback, style='success.TButton')
-    button.grid(row=7, column=3)
+    ttk.Label(left, text="聯絡簿課程名稱", font=("Microsoft JhengHei", 11)).grid(
+        row=3, column=0, sticky="w", pady=(0, 8)
+    )
+    display_course_combo = ttk.Combobox(
+        left,
+        values=["(原始課名)", "線上菁英初階", "線上菁英中階", "線上菁英高階"],
+        state="readonly",
+    )
+    display_course_combo.current(0)
+    display_course_combo.grid(row=3, column=1, sticky="ew", pady=(0, 8))
 
-    return entry, entrystudy, comboExample1, comboExample2, radiobutton_var, CheckVarAI, CheckVar1
+    ttk.Label(left, text="聯絡簿堂數（1~45）", font=("Microsoft JhengHei", 11)).grid(
+        row=4, column=0, sticky="w", pady=(0, 8)
+    )
+    display_lesson_entry = ttk.Entry(left, width=8)
+    display_lesson_entry.grid(row=4, column=1, sticky="w", pady=(0, 8))
+    display_lesson_entry.insert(0, str(int(lesson_combo.get()[1:])) if lesson_combo.get() else "")
+
+    def sync_display_lesson(_event=None):
+        value = lesson_combo.get()
+        if value and value[1:].isdigit():
+            display_lesson_entry.delete(0, "end")
+            display_lesson_entry.insert(0, value[1:])
+
+    lesson_combo.bind("<<ComboboxSelected>>", sync_display_lesson)
+
+    ttk.Label(left, text="進度狀態", font=("Microsoft JhengHei", 11)).grid(
+        row=5, column=0, sticky="w", pady=(0, 8)
+    )
+    schedule_var = tk.StringVar(value="fixed")
+    schedule_frame = ttk.Frame(left)
+    schedule_frame.grid(row=5, column=1, sticky="w", pady=(0, 8))
+    ttk.Radiobutton(schedule_frame, text="進度正常", value="fixed", variable=schedule_var).grid(
+        row=0, column=0, padx=(0, 12)
+    )
+    ttk.Radiobutton(schedule_frame, text="進度落後", value="makeup", variable=schedule_var).grid(
+        row=0, column=1
+    )
+
+    previous_var = tk.IntVar(value=0)
+    ttk.Checkbutton(left, text="上週未完成", variable=previous_var).grid(
+        row=6, column=0, columnspan=2, sticky="w", pady=(4, 0)
+    )
+
+    ai_var = tk.IntVar(value=1)
+    ttk.Checkbutton(left, text="AI 潤飾", variable=ai_var).grid(
+        row=7, column=0, columnspan=2, sticky="w", pady=(4, 0)
+    )
+
+    ttk.Label(right, text="學習表現（可簡短描述）", font=("Microsoft JhengHei", 11)).grid(
+        row=0, column=0, sticky="w"
+    )
+    performance_text = tk.Text(right, height=4, wrap="word")
+    performance_text.grid(row=1, column=0, sticky="ew", pady=(6, 16))
+
+    ttk.Label(right, text="本堂課驗收問題（可條列）", font=("Microsoft JhengHei", 11)).grid(
+        row=2, column=0, sticky="w"
+    )
+    questions_text = tk.Text(right, height=6, wrap="word")
+    questions_text.grid(row=3, column=0, sticky="ew", pady=(6, 12))
+
+    ttk.Label(right, text="上週進度驗收問題（可條列）", font=("Microsoft JhengHei", 11)).grid(
+        row=4, column=0, sticky="w"
+    )
+    previous_questions_text = tk.Text(right, height=5, wrap="word")
+    previous_questions_text.grid(row=5, column=0, sticky="nsew", pady=(6, 0))
+
+    action = ttk.Frame(root)
+    action.grid(row=2, column=0, sticky="ew", pady=(16, 0))
+    action.columnconfigure(0, weight=1)
+    generate_btn = ttk.Button(action, text="產生聯絡簿", command=on_generate, style="success.TButton")
+    generate_btn.grid(row=0, column=0, sticky="e")
+
+    return (
+        name_entry,
+        performance_text,
+        questions_text,
+        previous_questions_text,
+        course_combo,
+        lesson_combo,
+        display_course_combo,
+        display_lesson_entry,
+        schedule_var,
+        previous_var,
+        ai_var,
+    )

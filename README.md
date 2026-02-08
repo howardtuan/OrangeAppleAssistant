@@ -1,54 +1,115 @@
-# OrangeAppleAssistant
+﻿# OrangeAppleAssistant
 
-這是一個用於管理和追蹤學生程式課程學習進度的工具，通過 OpenAI 的 GPT 模型，根據用戶輸入自動生成詳細的學習報告。
+## 應用程式介面
+![image](docs/screenshots/UI.png)
 
-## 功能
-- 讓用戶輸入課程細節和學生的學習表現。
-- 自動生成專業且禮貌的學習報告。
-- 支援多種程式課程，包括 Scratch、Python、JavaScript 和 AI等等。(可在db.py自行新增)
-- 使用 OpenAI 的 API 進行文字生成。
+快速整理課堂紀錄、產生聯絡簿內容的小工具。可輸入學習表現與驗收問題，並選擇 AI 潤飾。
 
-## 需求條件
-- Python 3.10 或更高版本
-- 包含 OpenAI API 金鑰的 `config.json` 文件（需自行提供）
+**重點功能**
+- 產生聯絡簿文字（不條列，文章格式）
+- 可勾選「上週未完成」並記錄上週驗收問題
+- 本堂課驗收問題必定出現
+- 一鍵複製到剪貼簿
+- 可選擇 AI 潤飾（OpenAI API）
 
-## 安裝步驟
-1. 複製專案到本地：
-   ```bash
-   git clone https://github.com/howardtuan/orangeapple.git 
-   ```
-2. 建立虛擬環境（可選但建議使用）：
-   ```bash
-   python -m venv venv
-   source venv/bin/activate   # Windows 系統執行：venv\Scripts\activate
-   ```
-3. 安裝所需的套件：
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. 在專案根目錄下建立 config.json 文件，結構如下：
-   ```json
-   {
-    "openai_api_key": "your-openai-api-key"
-   }
-   ```
-## 使用方法
-1.  執行主程式：
-    ```bash
-    python main.py
-    ```
-2. 在圖形化介面中輸入學生資訊、課程信息和學習表現。
-3. 可直接複製生成的學習報告，或保存用於後續使用。
+## 介面功能（可填寫 / 下拉選單）
+- 學生姓名：手動輸入
+- 課程：下拉選單（對應資料庫課程）
+- 課次：下拉選單（用來帶出該堂課內容）
+- 聯絡簿課程名稱：下拉選單（可自訂顯示為線上菁英初階/中階/高階或原始課名）
+- 聯絡簿堂數：手動輸入（1~45，可與課次同步）
+- 進度狀態：單選（進度正常/進度落後）
+- 上週未完成：勾選後可填上週驗收問題，並在聯絡簿開頭顯示
+- 學習表現：多行輸入
+- 本堂課驗收問題：多行輸入（一定會被寫入輸出）
+- AI 潤飾：勾選後使用 OpenAI 生成文字
+
+## 環境需求
+- Python 3.10+
+- OpenAI API Key（寫在 `config.json`）
+
+`config.json` 請放在專案根目錄（與 `main.py` 同層），打包時會一併內嵌。
+
+`config.json` 範例：
+```json
+{
+  "openai_api_key": "your-openai-api-key"
+}
+```
+
+## 安裝與啟動
+1. 建立虛擬環境
+```bash
+python -m venv venv
+venv\Scripts\activate #Winsows
+source venv/bin/activate #Mac
+```
+
+2. 安裝套件
+```bash
+pip install -r requirements.txt
+```
+
+3. 執行
+```bash
+python main.py
+```
+
+## 更新課程資料（db.py）
+課程資料都集中在 `db.py`，每個課程是一個清單（list）。
+
+**修改步驟**
+1. 開啟 `db.py`
+2. 找到對應課程清單（例如 `HTML`、`Python`、`JavaScript`）
+3. 每個項目代表一堂課的內容描述，請依序增減或修改文字
+
+**範例**
+```python
+HTML = [
+    "「我的個人網站(1)」，介紹基礎排版與標籤。",
+    "「我的個人網站(2)」，介紹圖片與超連結。",
+]
+```
+
+注意：
+- 課程清單的「順序」會影響 UI 的課次選擇結果
+- 若課次數量變更，UI 的課次下拉選單需要同步調整
+  - 在 `ui_components.py` 中找到 `values=[f"L{i}" for i in range(1, 16)]`
+  - 把 `16` 改成新的最大堂數 + 1
+
+## 打包成 Windows APP（EXE）
+本專案已提供 `main.spec`，會自動把 `config.json` 打包進去。
+
+```bash
+pyinstaller main.spec
+```
+
+完成後：
+- 產出位置：`dist\main\main.exe`
+
+## 打包成 macOS APP
+macOS 需要在 macOS 環境執行打包（Windows 無法直接產出 macOS App）。
+
+1. 在 macOS 安裝依賴
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+pip install pyinstaller
+```
+
+2. 直接打包
+```bash
+pyinstaller main.py --noconsole --name OrangeAppleAssistant --add-data "config.json:."
+```
+
+完成後：
+- 產出位置：`dist/OrangeAppleAssistant.app`
+
 ## 專案結構
-   ```bash
-  OrangeApple/
-  │
-  ├── db.py                # 包含預定義的課程和章節內容
-  ├── helpers.py           # 助手函數，包括 OpenAI API 的整合
-  ├── main.py              # 主程式邏輯及圖形化介面
-  ├── config.json          # 配置文件，存放 OpenAI API 金鑰（需自行建立）
-  ├── requirements.txt     # Python 依賴列表
-  └── README.md            # 專案說明文件
-   ```
-## JSON API 金鑰需求
-此專案需要用戶在 config.json 文件中提供有效的 OpenAI API 金鑰才能正常運行。請確保金鑰可用且未過期。
+- `main.py` 入口流程與聯絡簿產生
+- `ui_components.py` UI 佈局與元件
+- `helpers.py` OpenAI API 與課程名稱對應
+- `db.py` 課程內容資料
+- `config.json` API Key（可打包進執行檔）
+- `main.spec` PyInstaller 設定
