@@ -1,11 +1,13 @@
 ﻿import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox, ttk
+
+from question_bank import draw_lesson_questions, format_numbered_questions
 
 
 def create_ui(window, on_generate):
     window.title("學生聯絡簿產生器")
-    window.geometry("1080x720")
-    window.minsize(1040, 680)
+    window.geometry("1180x780")
+    window.minsize(1120, 740)
 
     root = ttk.Frame(window, padding=20)
     root.grid(sticky="nsew")
@@ -39,6 +41,7 @@ def create_ui(window, on_generate):
     left.columnconfigure(1, weight=1)
     right.columnconfigure(0, weight=1)
     right.rowconfigure(3, weight=1)
+    right.rowconfigure(5, weight=1)
 
     ttk.Label(left, text="學生姓名", font=("Microsoft JhengHei", 11)).grid(
         row=0, column=0, sticky="w", pady=(0, 8)
@@ -94,6 +97,34 @@ def create_ui(window, on_generate):
 
     lesson_combo.bind("<<ComboboxSelected>>", sync_display_lesson)
 
+    def get_previous_lesson_code():
+        value = lesson_combo.get()
+        if value and value[1:].isdigit():
+            previous_number = max(1, int(value[1:]) - 1)
+            return f"L{previous_number}"
+        return value
+
+    def draw_formatted_questions(course_code, lesson_code):
+        try:
+            questions = draw_lesson_questions(course_code, lesson_code)
+        except (FileNotFoundError, ValueError) as exc:
+            messagebox.showwarning(title="無法抽題", message=str(exc))
+            return None
+
+        return format_numbered_questions(questions)
+
+    def replace_text(text_widget, value):
+        text_widget.delete("1.0", "end")
+        text_widget.insert("1.0", value)
+
+    def fill_questions(text_widget, course_code, lesson_code):
+        value = draw_formatted_questions(course_code, lesson_code)
+        if value:
+            replace_text(text_widget, value)
+
+    def get_text_value(text_widget):
+        return text_widget.get("1.0", "end").strip()
+
     ttk.Label(left, text="進度狀態", font=("Microsoft JhengHei", 11)).grid(
         row=5, column=0, sticky="w", pady=(0, 8)
     )
@@ -117,21 +148,114 @@ def create_ui(window, on_generate):
         row=7, column=0, columnspan=2, sticky="w", pady=(4, 0)
     )
 
+    suggestion = ttk.LabelFrame(left, text="驗收問題建議", padding=12)
+    suggestion.grid(row=8, column=0, columnspan=2, sticky="ew", pady=(16, 0))
+    suggestion.columnconfigure(1, weight=1)
+
+    ttk.Label(suggestion, text="抽題課程", font=("Microsoft JhengHei", 10)).grid(
+        row=0, column=0, sticky="w", pady=(0, 8)
+    )
+    draw_course_combo = ttk.Combobox(
+        suggestion,
+        values=list(course_combo["values"]),
+        state="readonly",
+        width=18,
+    )
+    draw_course_combo.set(course_combo.get())
+    draw_course_combo.grid(row=0, column=1, sticky="ew", pady=(0, 8))
+
+    ttk.Label(suggestion, text="抽題課次", font=("Microsoft JhengHei", 10)).grid(
+        row=1, column=0, sticky="w", pady=(0, 8)
+    )
+    draw_lesson_combo = ttk.Combobox(
+        suggestion,
+        values=list(lesson_combo["values"]),
+        state="readonly",
+        width=10,
+    )
+    draw_lesson_combo.set(lesson_combo.get())
+    draw_lesson_combo.grid(row=1, column=1, sticky="ew", pady=(0, 8))
+
+    standalone_questions_text = tk.Text(suggestion, height=4, wrap="word")
+    standalone_questions_text.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 8))
+
+    standalone_actions = ttk.Frame(suggestion)
+    standalone_actions.grid(row=3, column=0, columnspan=2, sticky="ew")
+    for index in range(4):
+        standalone_actions.columnconfigure(index, weight=1)
+
+    def draw_standalone_questions():
+        value = draw_formatted_questions(draw_course_combo.get(), draw_lesson_combo.get())
+        if value:
+            replace_text(standalone_questions_text, value)
+
+    def paste_standalone_questions(target_text):
+        value = get_text_value(standalone_questions_text)
+        if not value:
+            messagebox.showwarning(title="尚未抽題", message="請先選擇課程與課次後按「獨立抽三題」。")
+            return
+        replace_text(target_text, value)
+
+    def copy_standalone_questions():
+        value = get_text_value(standalone_questions_text)
+        if not value:
+            messagebox.showwarning(title="尚未抽題", message="請先選擇課程與課次後按「獨立抽三題」。")
+            return
+        window.clipboard_clear()
+        window.clipboard_append(value)
+        window.update()
+        messagebox.showinfo(title="已複製", message="抽出的題目已複製到剪貼簿。")
+
+    ttk.Button(standalone_actions, text="獨立抽三題", command=draw_standalone_questions).grid(
+        row=0, column=0, sticky="ew", padx=(0, 6)
+    )
+    ttk.Button(
+        standalone_actions,
+        text="貼到本堂",
+        command=lambda: paste_standalone_questions(questions_text),
+    ).grid(row=0, column=1, sticky="ew", padx=(0, 6))
+    ttk.Button(
+        standalone_actions,
+        text="貼到上週",
+        command=lambda: paste_standalone_questions(previous_questions_text),
+    ).grid(row=0, column=2, sticky="ew", padx=(0, 6))
+    ttk.Button(standalone_actions, text="複製", command=copy_standalone_questions).grid(
+        row=0, column=3, sticky="ew"
+    )
+
     ttk.Label(right, text="學習表現（可簡短描述）", font=("Microsoft JhengHei", 11)).grid(
         row=0, column=0, sticky="w"
     )
     performance_text = tk.Text(right, height=4, wrap="word")
     performance_text.grid(row=1, column=0, sticky="ew", pady=(6, 16))
 
-    ttk.Label(right, text="本堂課驗收問題（可條列）", font=("Microsoft JhengHei", 11)).grid(
-        row=2, column=0, sticky="w"
+    questions_header = ttk.Frame(right)
+    questions_header.grid(row=2, column=0, sticky="ew")
+    questions_header.columnconfigure(0, weight=1)
+    ttk.Label(questions_header, text="本堂課驗收問題（可條列）", font=("Microsoft JhengHei", 11)).grid(
+        row=0, column=0, sticky="w"
     )
+    ttk.Button(
+        questions_header,
+        text="抽三題帶入",
+        command=lambda: fill_questions(questions_text, course_combo.get(), lesson_combo.get()),
+    ).grid(row=0, column=1, sticky="e")
     questions_text = tk.Text(right, height=6, wrap="word")
     questions_text.grid(row=3, column=0, sticky="ew", pady=(6, 12))
 
-    ttk.Label(right, text="上週進度驗收問題（可條列）", font=("Microsoft JhengHei", 11)).grid(
-        row=4, column=0, sticky="w"
-    )
+    previous_questions_header = ttk.Frame(right)
+    previous_questions_header.grid(row=4, column=0, sticky="ew")
+    previous_questions_header.columnconfigure(0, weight=1)
+    ttk.Label(
+        previous_questions_header,
+        text="上週進度驗收問題（可條列）",
+        font=("Microsoft JhengHei", 11),
+    ).grid(row=0, column=0, sticky="w")
+    ttk.Button(
+        previous_questions_header,
+        text="抽上一課帶入",
+        command=lambda: fill_questions(previous_questions_text, course_combo.get(), get_previous_lesson_code()),
+    ).grid(row=0, column=1, sticky="e")
     previous_questions_text = tk.Text(right, height=5, wrap="word")
     previous_questions_text.grid(row=5, column=0, sticky="nsew", pady=(6, 0))
 

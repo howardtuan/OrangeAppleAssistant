@@ -1,4 +1,5 @@
 ﻿import json
+import os
 import sys
 from pathlib import Path
 
@@ -9,6 +10,10 @@ def load_api_key_from_json(file_path="config.json"):
     """
     從 JSON 配置檔讀取 OpenAI API Key
     """
+    env_api_key = os.getenv("OPENAI_API_KEY")
+    if env_api_key:
+        return env_api_key
+
     base_dir = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
     config_path = Path(file_path)
 
@@ -19,6 +24,8 @@ def load_api_key_from_json(file_path="config.json"):
         fallback = Path.cwd() / file_path
         if fallback.exists():
             config_path = fallback
+        else:
+            return None
 
     with open(config_path, "r", encoding="utf-8") as file:
         config = json.load(file)

@@ -85,7 +85,14 @@ def on_generate():
     contact_book = opening + contact_body
 
     if ai_var.get() == 1:
-        output = aichat(contact_book)
+        try:
+            output = aichat(contact_book)
+        except Exception as exc:
+            messagebox.showerror(
+                title="AI 潤飾失敗",
+                message=f"{exc}\n\n請確認 OPENAI_API_KEY 或 config.json，或先取消 AI 潤飾。",
+            )
+            return
         marker = "已完成上週內容，驗收問題為：【"
         cleaned = output.lstrip()
         if marker in cleaned:
